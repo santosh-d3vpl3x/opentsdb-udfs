@@ -2,9 +2,10 @@ set pig.exec.nocombiner true;
 set mapreduce.child.java.opts -Xmx2048m;
 set mapreduce.map.memory.mb 3072;
 
-register 'hdfs:///tmp/personalizationSqoopPig-jar-with-dependencies.jar'
-define generate_mapping com.mmt.dpt.pig.udf.reporting.MetricToTagsHash;
-define uidToLong com.mmt.dpt.pig.udf.reporting.TSDUIDtoLong;
+register 'hdfs:///tmp/OpenTSDBCardinailty-0.0.1-jar-with-dependencies.jar'
+
+define generate_mapping com.opentsdb.tools.udf.MetricToTagsHash;
+define uidToLong com.opentsdb.tools.udf.TSDUIDtoLong;
 
 TSD_METRICS     = LOAD 'hbase://tsdb' using  org.apache.pig.backend.hadoop.hbase.HBaseStorage('t', '-caster=HBaseBinaryConverter -loadKey=true') AS (key);
 TRANSFORMED_DATA = FOREACH TSD_METRICS GENERATE flatten(generate_mapping(key)) as (metric_id:long, tag_hash:int);
