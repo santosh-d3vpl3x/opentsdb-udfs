@@ -1,4 +1,4 @@
-package com.mmt.dpt.pig.udf.reporting;
+package com.opentsdb.tools.udf;
 
 import java.io.IOException;
 
@@ -6,7 +6,7 @@ import org.apache.pig.EvalFunc;
 import org.apache.pig.data.DataByteArray;
 import org.apache.pig.data.Tuple;
 
-import com.mmt.dpt.utils.Common;
+import com.opentsdb.tools.udf.utils.Common;
 
 /**
  * @author Santosh Pingale

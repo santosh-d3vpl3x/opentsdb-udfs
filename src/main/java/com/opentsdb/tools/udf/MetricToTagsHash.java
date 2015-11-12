@@ -1,8 +1,9 @@
-package com.mmt.dpt.pig.udf.reporting;
+package com.opentsdb.tools.udf;
 
 import java.io.IOException;
 import java.util.TreeMap;
 
+import org.apache.commons.logging.Log;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.DataByteArray;
 import org.apache.pig.data.DataType;
@@ -12,16 +13,16 @@ import org.apache.pig.impl.logicalLayer.schema.Schema;
 import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.mmt.dpt.utils.Common;
-import com.mmt.dpt.utils.Common.Constants;
+import com.opentsdb.tools.udf.utils.Common;
+import com.opentsdb.tools.udf.utils.Common.Constants;
 
 /**
  * @author Santosh Pingale
  *
- *         Class responsible for decoding tsdb key. Generates map of tag key-> tag value against
- *         metric uid.
+ *         UDF responsible for decoding tsdb key. Generates Hash of the values. Getting hash is
+ *         optimizations to make sure we do not run out of memory.
  */
-public class MetricToTags extends EvalFunc<Tuple> {
+public class MetricToTagsHash extends EvalFunc<Tuple> {
 
   ObjectMapper objMapper = new ObjectMapper();
 
@@ -31,16 +32,20 @@ public class MetricToTags extends EvalFunc<Tuple> {
 
   int tvWdth = Constants.TV_UID_WIDTH;
 
-  public MetricToTags(int mWdth, int tkWdth, int tvWdth) {
+  public MetricToTagsHash(int mWdth, int tkWdth, int tvWdth) {
     super();
     this.mWdth = mWdth;
     this.tkWdth = tkWdth;
     this.tvWdth = tvWdth;
   }
+  
+  
 
-  public MetricToTags() {
+  public MetricToTagsHash() {
     super();
   }
+
+
 
   @Override
   public Tuple exec(Tuple input) throws IOException {
@@ -60,7 +65,7 @@ public class MetricToTags extends EvalFunc<Tuple> {
 
       TreeMap<Long, Long> tags = Common.generateTagMap(tagPairHex, mWdth, tkWdth, tvWdth);
 
-      String tagsHash = objMapper.writeValueAsString(tags);
+      int tagsHash = objMapper.writeValueAsString(tags).hashCode();
 
       Tuple output = TupleFactory.getInstance().newTuple(2);
       output.set(0, metricID);
